@@ -1,4 +1,3 @@
-
 'use client';
 import React, { useRef, useState } from "react";
 import { FaBalanceScale, FaGavel, FaUserShield, FaHandshake } from "react-icons/fa";
@@ -36,6 +35,7 @@ export default function Whyus() {
     // Duplicate cards for seamless loop
     const marqueeCards = [...cards, ...cards];
 
+    // Mouse events
     const handleMouseDown = (e) => {
         setDrag({
             isDragging: true,
@@ -52,6 +52,24 @@ export default function Whyus() {
     };
 
     const handleMouseUp = () => setDrag((d) => ({ ...d, isDragging: false }));
+
+    // Touch events
+    const handleTouchStart = (e) => {
+        setDrag({
+            isDragging: true,
+            startX: e.touches[0].pageX - marqueeRef.current.offsetLeft,
+            scrollLeft: marqueeRef.current.scrollLeft,
+        });
+    };
+
+    const handleTouchMove = (e) => {
+        if (!drag.isDragging) return;
+        const x = e.touches[0].pageX - marqueeRef.current.offsetLeft;
+        const walk = (x - drag.startX) * 1.2;
+        marqueeRef.current.scrollLeft = drag.scrollLeft - walk;
+    };
+
+    const handleTouchEnd = () => setDrag((d) => ({ ...d, isDragging: false }));
 
     // Infinite scroll effect
     const handleScroll = () => {
@@ -75,12 +93,16 @@ export default function Whyus() {
                     cursor: drag.isDragging ? "grabbing" : "grab",
                     userSelect: "none",
                     width: "100%",
+                    touchAction: "pan-y", // allow horizontal drag
                 }}
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseUp}
                 onScroll={handleScroll}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
                 tabIndex={0}
             >
                 <div
